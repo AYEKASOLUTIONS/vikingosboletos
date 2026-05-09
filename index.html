@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="Boletos"/>
+<title>Registro de Boletos</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;min-height:100vh;padding:16px;color:#1a1a1a}
+.app{max-width:480px;margin:0 auto}
+h1{font-size:20px;font-weight:600;margin-bottom:4px;color:#1a1a1a}
+.subtitle{font-size:13px;color:#777;margin-bottom:16px}
+
+/* TABS */
+.event-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.tab{padding:12px 8px;border-radius:12px;border:1.5px solid #ddd;background:#fff;cursor:pointer;text-align:center;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.tab-name{font-size:14px;font-weight:600;color:#888}
+.tab-sub{font-size:11px;color:#aaa;margin-top:2px}
+.tab.active-bf{background:#e8f8f2;border-color:#1D9E75}
+.tab.active-bf .tab-name{color:#0F6E56}
+.tab.active-bf .tab-sub{color:#1D9E75}
+.tab.active-pv{background:#e8f2fb;border-color:#378ADD}
+.tab.active-pv .tab-name{color:#185FA5}
+.tab.active-pv .tab-sub{color:#378ADD}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat{background:#fff;border-radius:10px;padding:12px 10px;border:1px solid #eee}
+.stat-label{font-size:11px;color:#888;margin-bottom:4px;line-height:1.2}
+.stat-val{font-size:20px;font-weight:600;color:#1a1a1a}
+.stat-val.green{color:#1D9E75}
+.stat-val.blue{color:#378ADD}
+.stat-val.amber{color:#BA7517}
+
+/* VIP BLOCK */
+.vip-block{border:1.5px solid #BA7517;border-radius:12px;background:#FAEEDA;padding:16px;margin-bottom:16px}
+.vip-title{font-size:14px;font-weight:600;color:#633806;margin-bottom:2px}
+.vip-subtitle{font-size:11px;color:#BA7517;margin-bottom:14px}
+.vip-counter-row{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.vip-big{font-size:56px;font-weight:700;color:#633806;line-height:1;min-width:64px}
+.vip-btns{display:flex;gap:10px}
+.vip-btn{width:48px;height:48px;border-radius:10px;border:none;font-size:26px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;background:#1a1a1a;color:#fff;-webkit-tap-highlight-color:transparent;transition:opacity .15s}
+.vip-btn:active{opacity:.7}
+.vip-btn-confirm{width:100%;height:44px;border-radius:10px;border:none;background:#BA7517;color:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent;transition:opacity .15s}
+.vip-btn-confirm:active{opacity:.8}
+.vip-confirmed{display:flex;align-items:center;gap:6px;font-size:13px;color:#0F6E56;margin-top:10px;font-weight:600}
+.vip-confirmed.hidden{display:none}
+.vip-note{font-size:11px;color:#BA7517;margin-top:8px}
+
+/* FORM */
+.form-card{background:#fff;border:1px solid #eee;border-radius:12px;padding:16px;margin-bottom:16px}
+.section-label{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:12px;color:#666;margin-bottom:5px;font-weight:500}
+.form-group input{width:100%;height:44px;border-radius:10px;border:1.5px solid #e0e0e0;background:#fafafa;color:#1a1a1a;padding:0 12px;font-size:15px;outline:none;transition:border .15s;-webkit-appearance:none;font-family:inherit}
+.form-group input:focus{border-color:#378ADD;background:#fff}
+.price-chips{display:flex;gap:8px;margin-top:8px}
+.price-chip{padding:7px 16px;border-radius:20px;border:1.5px solid #ddd;background:#f5f5f0;font-size:14px;font-weight:600;color:#555;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.price-chip.sel-green{background:#e8f8f2;border-color:#1D9E75;color:#0F6E56}
+.price-chip.sel-blue{background:#e8f2fb;border-color:#378ADD;color:#185FA5}
+.qty-row{display:flex;align-items:center;gap:12px}
+.qty-btn{width:44px;height:44px;border-radius:10px;border:1.5px solid #ddd;background:#f5f5f0;color:#1a1a1a;font-size:22px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:background .1s}
+.qty-btn:active{background:#e0e0e0}
+.qty-num{font-size:22px;font-weight:700;min-width:32px;text-align:center;color:#1a1a1a}
+.total-row{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid #eee;margin-top:4px}
+.total-label{font-size:13px;color:#888}
+.total-price{font-size:26px;font-weight:700}
+.total-price.green{color:#1D9E75}
+.total-price.blue{color:#378ADD}
+.btn-add{width:100%;height:48px;border-radius:10px;color:#fff;border:none;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
+.btn-add.green{background:#1D9E75}
+.btn-add.blue{background:#378ADD}
+.btn-add:active{opacity:.85}
+
+/* LIST */
+.list-card{background:#fff;border:1px solid #eee;border-radius:12px;padding:16px}
+.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px}
+.list-title{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.05em}
+.list-controls{display:flex;gap:8px;align-items:center}
+.search-wrap{position:relative}
+.search-wrap input{height:36px;padding:0 10px 0 32px;font-size:13px;border-radius:10px;border:1.5px solid #e0e0e0;background:#f5f5f0;color:#1a1a1a;width:140px;outline:none;font-family:inherit;-webkit-appearance:none}
+.search-wrap input:focus{border-color:#378ADD;background:#fff}
+.search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#aaa;font-size:15px}
+.ticket-list{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.ticket-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f9f9f7;border-radius:10px;border:1px solid #eee}
+.ticket-info{flex:1;min-width:0}
+.ticket-name{font-size:14px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticket-meta{font-size:12px;color:#888;margin-top:1px}
+.badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:600;white-space:nowrap}
+.badge-gen{background:#eaf3de;color:#27500A}
+.badge-qty{background:#fff;color:#666;border:1px solid #ddd}
+.ticket-price{font-size:14px;font-weight:700;min-width:60px;text-align:right}
+.price-green{color:#1D9E75}
+.price-blue{color:#378ADD}
+.btn-del{background:none;border:none;cursor:pointer;color:#bbb;padding:4px;border-radius:6px;display:flex;align-items:center;font-size:18px;-webkit-tap-highlight-color:transparent}
+.btn-del:active{color:#e24b4a}
+.empty{text-align:center;padding:2rem;color:#bbb;font-size:13px}
+.btn-export{height:36px;padding:0 12px;border-radius:10px;border:1.5px solid #ddd;background:#f5f5f0;color:#666;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;font-family:inherit}
+.btn-export:active{background:#e8e8e4}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:600;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.15)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+.header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.clock-box{text-align:right;background:#fff;border:1px solid #eee;border-radius:12px;padding:8px 14px}
+.clock-time{font-size:22px;font-weight:700;color:#1a1a1a;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.clock-label{font-size:10px;color:#aaa;text-align:center;margin-top:1px;text-transform:uppercase;letter-spacing:.05em}
+
+@media(max-width:360px){
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .stat-val{font-size:17px}
+  .vip-big{font-size:44px}
+  .search-wrap input{width:110px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header-row">
+    <div>
+      <h1>🎟 Registro de Boletos</h1>
+      <div class="subtitle" id="fecha-hoy"></div>
+    </div>
+    <div class="clock-box">
+      <div class="clock-time" id="clock-time">00:00:00</div>
+      <div class="clock-label">hora actual</div>
+    </div>
+  </div>
+
+  <div class="event-tabs">
+    <div class="tab active-bf" id="tab-bf" onclick="setEvento('bf')">
+      <div class="tab-name">🎵 Bajo Fino</div>
+      <div class="tab-sub">General · $500</div>
+    </div>
+    <div class="tab" id="tab-pv" onclick="setEvento('pv')">
+      <div class="tab-name">🏖 Playa Vikingos</div>
+      <div class="tab-sub">General $395 · VIP Mesa</div>
+    </div>
+  </div>
+
+  <div class="stats" id="stats-box"></div>
+  <div id="vip-block-wrap"></div>
+
+  <div class="form-card">
+    <div class="section-label" id="form-label"></div>
+    <div class="form-group">
+      <label>Nombre del comprador</label>
+      <input type="text" id="inp-nombre" placeholder="Ej. Juan Pérez" autocomplete="off"/>
+    </div>
+    <div class="form-group">
+      <label>Precio unitario</label>
+      <input type="number" id="inp-precio" placeholder="$0.00" min="0" step="0.01" inputmode="decimal" oninput="actualizarTotal()"/>
+      <div class="price-chips" id="price-chips"></div>
+    </div>
+    <div class="form-group">
+      <label>Cantidad</label>
+      <div class="qty-row">
+        <button class="qty-btn" onclick="cambiarQty(-1)">−</button>
+        <div class="qty-num" id="qty-display">1</div>
+        <button class="qty-btn" onclick="cambiarQty(1)">+</button>
+      </div>
+    </div>
+    <div class="total-row">
+      <div class="total-label">Total de esta venta</div>
+      <div class="total-price green" id="total-venta">$0.00</div>
+    </div>
+    <button class="btn-add green" id="btn-registrar" onclick="registrar()">✓ Registrar venta</button>
+  </div>
+
+  <div class="list-card">
+    <div class="list-header">
+      <div class="list-title" id="list-title"></div>
+      <div class="list-controls">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="inp-buscar" placeholder="Buscar..." oninput="renderLista()"/>
+        </div>
+        <button class="btn-export" onclick="exportar()">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="ticket-list" id="ticket-list"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let eventoActual='bf', qty=1, precioSel=null;
+let ventas={bf:[],pv:[]};
+let vipCount=0, vipConfirmado=false;
+const PRECIOS={bf:[500],pv:[395]};
+
+document.getElementById('fecha-hoy').textContent=new Date().toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+function actualizarReloj(){
+  const ahora=new Date();
+  const h=String(ahora.getHours()).padStart(2,'0');
+  const m=String(ahora.getMinutes()).padStart(2,'0');
+  const s=String(ahora.getSeconds()).padStart(2,'0');
+  document.getElementById('clock-time').textContent=h+':'+m+':'+s;
+}
+actualizarReloj();
+setInterval(actualizarReloj,1000);
+
+function setEvento(ev){
+  eventoActual=ev; qty=1; precioSel=null;
+  ['inp-nombre','inp-precio','inp-buscar'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('qty-display').textContent='1';
+  document.getElementById('total-venta').textContent='$0.00';
+  ['bf','pv'].forEach(e=>document.getElementById('tab-'+e).className='tab'+(e===ev?' active-'+e:''));
+  const ac=ev==='bf'?'green':'blue';
+  document.getElementById('total-venta').className='total-price '+ac;
+  document.getElementById('btn-registrar').className='btn-add '+ac;
+  renderUI();
+}
+
+function setPrecio(p){
+  precioSel=p;
+  document.getElementById('inp-precio').value=p;
+  actualizarTotal(); renderChips();
+}
+
+function renderChips(){
+  const ac=eventoActual==='bf'?'green':'blue';
+  document.getElementById('price-chips').innerHTML=PRECIOS[eventoActual].map(p=>
+    `<button class="price-chip${precioSel===p?' sel-'+ac:''}" onclick="setPrecio(${p})">$${p}</button>`
+  ).join('');
+}
+
+function renderVipBlock(){
+  const wrap=document.getElementById('vip-block-wrap');
+  if(eventoActual!=='pv'){wrap.innerHTML='';return;}
+  wrap.innerHTML=`
+    <div class="vip-block">
+      <div class="vip-title">👑 Asistentes VIP — Mesa incluida</div>
+      <div class="vip-subtitle">Solo contabiliza, no genera cobro</div>
+      <div class="vip-counter-row">
+        <div class="vip-big" id="vip-num">${vipCount}</div>
+        <div class="vip-btns">
+          <button class="vip-btn" onclick="cambiarVip(-1)" aria-label="Restar">−</button>
+          <button class="vip-btn" onclick="cambiarVip(1)" aria-label="Sumar">+</button>
+        </div>
+      </div>
+      <button class="vip-btn-confirm" onclick="confirmarVip()">✓ Confirmar ${vipCount} asistente${vipCount!==1?'s':''} VIP</button>
+      <div class="vip-confirmed${vipConfirmado?'':' hidden'}" id="vip-ok">✅ ¡Confirmado! ${vipCount} VIP registrado${vipCount!==1?'s':''}</div>
+      <div class="vip-note">ℹ️ El total recaudado no incluye VIP</div>
+    </div>`;
+}
+
+function cambiarVip(d){
+  vipCount=Math.max(0,vipCount+d); vipConfirmado=false;
+  renderVipBlock(); renderStats();
+}
+
+function confirmarVip(){
+  vipConfirmado=true; renderVipBlock(); renderStats();
+  toast('¡'+vipCount+' VIP confirmado'+(vipCount!==1?'s':'')+'!');
+}
+
+function renderUI(){
+  document.getElementById('form-label').textContent='Nuevo registro — '+(eventoActual==='bf'?'Bajo Fino':'Playa Vikingos');
+  document.getElementById('list-title').textContent='Ventas — '+(eventoActual==='bf'?'Bajo Fino':'Playa Vikingos');
+  renderChips(); renderVipBlock(); renderStats(); renderLista();
+}
+
+function renderStats(){
+  const lista=ventas[eventoActual];
+  const ac=eventoActual==='bf'?'green':'blue';
+  const totalB=lista.reduce((a,v)=>a+v.qty,0);
+  const totalM=lista.reduce((a,v)=>a+v.total,0);
+  const ter=eventoActual==='pv'
+    ?`<div class="stat"><div class="stat-label">VIP</div><div class="stat-val amber">${vipCount}${vipConfirmado?' ✓':''}</div></div>`
+    :`<div class="stat"><div class="stat-label">Transacciones</div><div class="stat-val">${lista.length}</div></div>`;
+  document.getElementById('stats-box').innerHTML=`
+    <div class="stat"><div class="stat-label">Boletos</div><div class="stat-val">${totalB}</div></div>
+    <div class="stat"><div class="stat-label">Recaudado</div><div class="stat-val ${ac}">$${totalM.toLocaleString('es-MX',{minimumFractionDigits:0,maximumFractionDigits:0})}</div></div>
+    ${ter}`;
+}
+
+function cambiarQty(d){
+  qty=Math.max(1,qty+d);
+  document.getElementById('qty-display').textContent=qty;
+  actualizarTotal();
+}
+
+function actualizarTotal(){
+  const precio=parseFloat(document.getElementById('inp-precio').value)||0;
+  document.getElementById('total-venta').textContent='$'+(precio*qty).toFixed(2);
+}
+
+function registrar(){
+  const nombre=document.getElementById('inp-nombre').value.trim();
+  const precio=parseFloat(document.getElementById('inp-precio').value);
+  if(!nombre){toast('Ingresa el nombre del comprador','err');return;}
+  if(!precio||precio<=0){toast('Selecciona o ingresa un precio','err');return;}
+  ventas[eventoActual].unshift({id:Date.now(),nombre,precio,qty,total:precio*qty,
+    hora:new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'})});
+  renderStats(); renderLista();
+  document.getElementById('inp-nombre').value='';
+  document.getElementById('inp-precio').value='';
+  precioSel=null; qty=1;
+  document.getElementById('qty-display').textContent='1';
+  document.getElementById('total-venta').textContent='$0.00';
+  renderChips(); toast('¡Venta registrada!');
+}
+
+function eliminar(id){
+  ventas[eventoActual]=ventas[eventoActual].filter(v=>v.id!==id);
+  renderStats(); renderLista();
+}
+
+function renderLista(){
+  const q=document.getElementById('inp-buscar').value.toLowerCase();
+  const ac=eventoActual==='bf'?'price-green':'price-blue';
+  const filtradas=ventas[eventoActual].filter(v=>v.nombre.toLowerCase().includes(q));
+  const el=document.getElementById('ticket-list');
+  if(!filtradas.length){
+    el.innerHTML=`<div class="empty">🎟<br>${ventas[eventoActual].length?'Sin resultados':'Aún no hay ventas registradas'}</div>`;
+    return;
+  }
+  el.innerHTML=filtradas.map(v=>`
+    <div class="ticket-item">
+      <div class="ticket-info">
+        <div class="ticket-name">${v.nombre}</div>
+        <div class="ticket-meta">${v.hora} · $${v.precio} c/u</div>
+      </div>
+      <span class="badge badge-gen">General</span>
+      <span class="badge badge-qty">${v.qty}x</span>
+      <div class="ticket-price ${ac}">$${v.total.toLocaleString('es-MX',{minimumFractionDigits:0})}</div>
+      <button class="btn-del" onclick="eliminar(${v.id})" aria-label="Eliminar">🗑</button>
+    </div>`).join('');
+}
+
+function exportar(){
+  const lista=ventas[eventoActual];
+  if(!lista.length){toast('No hay ventas para exportar','err');return;}
+  const evNombre=eventoActual==='bf'?'Bajo Fino':'Playa Vikingos';
+  const rows=[['Evento','Nombre','Precio unitario','Cantidad','Total','Hora']];
+  lista.forEach(v=>rows.push([evNombre,v.nombre,v.precio,v.qty,v.total,v.hora]));
+  if(eventoActual==='pv') rows.push(['','Asistentes VIP (sin cobro)','','',vipCount,'']);
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=evNombre.replace(/ /g,'_')+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); toast('CSV exportado');
+}
+
+function toast(msg,tipo){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.background=tipo==='err'?'#e24b4a':'#1D9E75';
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+setEvento('bf');
+</script>
+</body>
+</html>
